@@ -57,15 +57,15 @@ namespace Game
 	public class Rectangle : Drawable
 	{
 		private double width, height;
-		private int[] color;
+		private double[] color;
 
 		public Rectangle(double x, double y, double width, double height) : base(x, y)
 		{
-			color = new int[] { 0, 0, 0 };
+			color = new double[] { 0, 0, 0 };
 			this.width = width;
 			this.height = height;
 		}
-        public Rectangle(double x, double y, double width, double height, int[] color) : base(x, y)
+        public Rectangle(double x, double y, double width, double height, double[] color) : base(x, y)
 		{
 			this.width = width;
 			this.height = height;

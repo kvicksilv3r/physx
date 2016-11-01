@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
+//FIXME: Lägg in allt i gameObjects istället för att separera bullets och object
+// poäng
+// Fixa blå portalen
+// Spawna block
+// Köra tanken?
+
 // The Actor class is where Drawable objects are added to the game and their positions updated.
 namespace Game
 {
@@ -12,17 +18,20 @@ namespace Game
 		// Keeping track of the time is useful timed updates
 		private DateTime time = DateTime.Now;
 		// Add your data structures below this comment
-		private double elevation = 0.0;
+		private double elevation = 1.57 / 2;
 
 		private double force = 0.0;
-		private double powerBarLength = 10;
-		private double maxForce = 40;
-		private double forceIncrease = 0.8;
+		private double powerBarLength = 8;
+		private double maxForce = 60;
+		private double forceIncrease = 1;
 
 		private double gravity = -1;
 
 		private Rectangle powerBar;
 		private Rectangle powerBarBg;
+
+		private GameObject orangePortal;
+		private GameObject bluePortal;
 
 		private GameObject target1;
 
@@ -37,9 +46,10 @@ namespace Game
 		};
 
 		List<GameObject> gameObjects = new List<GameObject>();
-		List<Bullet> bullets = new List<Bullet>();
 
-		int[] powerColor = new int[] { 1, 0, 0 };
+		double[] colorRed = new double[] { 1, 0, 0 };
+		double[] colorBlue = new double[] { 31 / 255.0, 175 / 255.0, 242 / 255.0 };
+		double[] colorOrange = new double[] { 249 / 255f, 161 / 255f, 29 / 255f };
 
 		private List<Gdk.Key> keys = new List<Gdk.Key>();
 		private List<Gdk.Key> lastKeys = new List<Gdk.Key>();
@@ -51,10 +61,21 @@ namespace Game
 
 			// Add your initialisations below this comment
 
-			powerBar = new Rectangle(powerBarPos, game.DefaultHeight - 40, 0, 20, powerColor);
+			bluePortal = new GameObject("portal");
+			bluePortal.Box = new Rectangle(40, 450, 50, 200, colorBlue);
+			bluePortal.Active = false;
+			game.AddDrawable(bluePortal.Box);
+
+			orangePortal = new GameObject("portal");
+			orangePortal.Active = false;
+			orangePortal.Box = new Rectangle(1240, 450, 50, 200, colorOrange);
+			game.AddDrawable(orangePortal.Box);
+			gameObjects.Add(orangePortal);
+
+			powerBar = new Rectangle(powerBarPos, game.DefaultHeight - 40, 0, 20, colorRed);
 			powerBarBg = new Rectangle(-4 + powerBarPos + (maxForce * powerBarLength) / 2, game.DefaultHeight - 40, maxForce * powerBarLength, 26);
 
-			target1 = new GameObject();
+			target1 = new GameObject("target");
 			target1.Box = new Rectangle(400, 400, 50, 50);
 			gameObjects.Add(target1);
 
@@ -74,21 +95,27 @@ namespace Game
 			HandleKeys();
 			barrel.Angle = elevation;
 
-			for (int i = 0; i < bullets.Count; i++)
-			{
-				Vector2 velocity = bullets[i].Velocity;
-				velocity.y += gravity;
-				bullets[i].Velocity = velocity;
-				bullets[i].Box.Translate(velocity.x, velocity.y);
+			
 
-				if (bullets[i].Box.Y <= -bullets[i].Box.Height || bullets[i].Box.X >= game.DefaultWidth + bullets[i].Box.Width)
+			for (int i = 0; i < gameObjects.Count; i++)
+			{
+				if (gameObjects[i].Active)
 				{
-					game.RemoveDrawable(bullets[i].Box);
-					bullets.Remove(bullets[i]);
+					Vector2 velocity = gameObjects[i].Velocity;
+					velocity.y += gravity;
+					gameObjects[i].Velocity = velocity;
+					gameObjects[i].Box.Translate(velocity.x, velocity.y);
+
+					if (gameObjects[i].Box.Y <= -gameObjects[i].Box.Height ||
+						gameObjects[i].Box.X >= game.DefaultWidth + gameObjects[i].Box.Width)
+					{
+						game.RemoveDrawable(gameObjects[i].Box);
+						gameObjects.Remove(gameObjects[i]);
+					}
 				}
 			}
 
-			powerBar.Width = force / maxForce * (powerBarBg.Width-15) ;
+			powerBar.Width = force / maxForce * (powerBarBg.Width - 15);
 			powerBar.X = powerBarPos + powerBar.Width / 2;
 
 			CheckCollisions();
@@ -99,17 +126,22 @@ namespace Game
 
 			if (keys.Contains(Gdk.Key.Left))
 			{
-				elevation += 0.1;
+				elevation += 0.05;
 
-				if (elevation > 1.6)
-					elevation = 1.6;
+				if (elevation > 1.57)
+					elevation = 1.57;
 			}
 			if (keys.Contains(Gdk.Key.Right))
 			{
-				elevation -= 0.1;
+				elevation -= 0.05;
 
 				if (elevation < 0)
 					elevation = -0;
+			}
+
+			if (keys.Contains(Gdk.Key.Escape))
+			{
+				Environment.Exit(0);
 			}
 
 			if (force > maxForce)
@@ -159,31 +191,49 @@ namespace Game
 			Vector2 barrelTip;
 			barrelTip.x = barrel.X + barrel.Width / 2 * Math.Cos(barrel.Angle);
 			barrelTip.y = barrel.Y + barrel.Width / 2 * Math.Sin(barrel.Angle);
-			Bullet bullet = new Bullet(barrelTip, barrel.Angle, force);
+			Bullet bullet = new Bullet(barrelTip, barrel.Angle, force, "bullet");
 			game.AddDrawable(bullet.Box);
-			bullets.Add(bullet);
+			gameObjects.Add(bullet);
 		}
 
 		public void CheckCollisions()
 		{
-			for (int i = 0; i < bullets.Count; i++)
+			for (int i = 0; i < gameObjects.Count; i++)
 			{
 				for (int j = 0; j < gameObjects.Count; j++)
 				{
-					if (IsColliding(bullets[i].Box, gameObjects[j].Box))
+					if (i != j && IsColliding(gameObjects[i].Box, gameObjects[j].Box))
 					{
-						Console.WriteLine("Butt");
-						//FIXME: Do physicstuff here maybe
+						if (gameObjects[j].Type == "target" && !gameObjects[j].Active)
+						{
+							gameObjects[j].Velocity = gameObjects[i].Velocity * 0.66;
+							gameObjects[i].Velocity = gameObjects[i].Velocity * 0.33;
+							gameObjects[j].Active = true;
+						}
+						else if (gameObjects[j].Type == "portal")
+						{
+							Portal(i);
+						}
 					}
 				}
 			}
 		}
 
+		public void Portal(int index)
+		{
+			double offset;
+
+			offset = gameObjects[index].Box.Y - orangePortal.Box.Y;
+			gameObjects[index].Box.X = bluePortal.Box.X;
+
+
+		}
+
 		public bool IsColliding(Rectangle r1, Rectangle r2)
 		{
-			if (r1.X + r1.Width / 2 > r2.X - r2.Width && r1.X - r1.Width / 2 < r2.X + r2.Width)
+			if (r1.X + r1.Width / 2 > r2.X - r2.Width / 2 && r1.X - r1.Width / 2 < r2.X + r2.Width / 2)
 			{
-				if (r1.Y + r1.Height / 2 > r2.Y - r2.Height && r1.Y - r1.Height / 2 < r2.Y + r2.Height)
+				if (r1.Y + r1.Height / 2 > r2.Y - r2.Height / 2 && r1.Y - r1.Height / 2 < r2.Y + r2.Height / 2)
 				{
 					return true;
 				}
@@ -193,11 +243,16 @@ namespace Game
 
 		class GameObject
 		{
-			private Rectangle box;
+			protected string type;
+			protected Vector2 velocity;
+			protected Rectangle box;
+			protected int weight;
+			protected bool active = false;
 
-			public GameObject()
+			public GameObject(string type)
 			{
 				box = new Rectangle(0, 0, 20, 20);
+				this.type = type;
 			}
 
 			public Rectangle Box
@@ -206,29 +261,33 @@ namespace Game
 				set { box = value; }
 			}
 
-		}
-
-		class Bullet : GameObject
-		{
-			private Vector2 velocity;
-
-			public Bullet(Vector2 position, double direction, double force)
+			public string Type
 			{
-				Box = new Rectangle(position.x, position.y, 10, 10);
-				velocity.x = force * Math.Cos(direction);
-				velocity.y = force * Math.Sin(direction);
+				get { return type; }
 			}
 
 			public Vector2 Velocity
 			{
-				get
-				{
-					return velocity;
-				}
-				set
-				{
-					velocity = value;
-				}
+				get { return velocity; }
+				set { velocity = value; }
+			}
+
+			public bool Active
+			{
+				get { return active; }
+				set { active = value; }
+			}
+
+		}
+
+		class Bullet : GameObject
+		{
+			public Bullet(Vector2 position, double direction, double force, string type) : base(type)
+			{
+				Box = new Rectangle(position.x, position.y, 10, 10);
+				velocity.x = force * Math.Cos(direction);
+				velocity.y = force * Math.Sin(direction);
+				active = true;
 			}
 		}
 
