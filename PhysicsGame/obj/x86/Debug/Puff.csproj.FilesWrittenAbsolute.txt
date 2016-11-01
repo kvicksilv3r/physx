@@ -1,0 +1,5 @@
+/private/tmp/Puff/obj/x86/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/private/tmp/Puff/bin/Debug/Puff.exe.mdb
+/private/tmp/Puff/bin/Debug/Puff.exe
+/private/tmp/Puff/obj/x86/Debug/Puff.exe
+/private/tmp/Puff/obj/x86/Debug/Puff.exe.mdb

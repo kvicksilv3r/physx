@@ -1,0 +1,5 @@
+/private/tmp/Gameplatform/obj/x86/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/private/tmp/Gameplatform/bin/Debug/Puff.exe.mdb
+/private/tmp/Gameplatform/bin/Debug/Puff.exe
+/private/tmp/Gameplatform/obj/x86/Debug/Puff.exe
+/private/tmp/Gameplatform/obj/x86/Debug/Puff.exe.mdb

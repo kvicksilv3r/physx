@@ -1,0 +1,22 @@
+﻿<Properties StartupConfiguration="{8653EBB5-A709-4E09-BD53-37647E1FFD7B}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Actor.cs">
+    <Files>
+      <File FileName="Program.cs" Line="74" Column="13" />
+      <File FileName="Actor.cs" Line="2" Column="10" />
+      <File FileName="Drawable.cs" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ClassPad">
+        <State name="__root__">
+          <Node name="Puff" expanded="True" selected="True" />
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.Puff PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
