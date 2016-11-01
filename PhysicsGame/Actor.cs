@@ -15,7 +15,7 @@ namespace Game
 		private double elevation = 0.0;
 
 		private double force = 0.0;
-		private double powerMulti = 5;
+		private double powerBarLength = 10;
 		private double maxForce = 40;
 		private double forceIncrease = 0.8;
 
@@ -51,8 +51,8 @@ namespace Game
 
 			// Add your initialisations below this comment
 
-			powerBar = new Rectangle(powerBarPos, 600 - 40, 0, 20, powerColor);
-			powerBarBg = new Rectangle(powerBarPos + (maxForce * powerMulti) / 2, 600 - 40, maxForce * powerMulti, 26);
+			powerBar = new Rectangle(powerBarPos, game.DefaultHeight - 40, 0, 20, powerColor);
+			powerBarBg = new Rectangle(-4 + powerBarPos + (maxForce * powerBarLength) / 2, game.DefaultHeight - 40, maxForce * powerBarLength, 26);
 
 			target1 = new GameObject();
 			target1.Box = new Rectangle(400, 400, 50, 50);
@@ -81,9 +81,14 @@ namespace Game
 				bullets[i].Velocity = velocity;
 				bullets[i].Box.Translate(velocity.x, velocity.y);
 
+				if (bullets[i].Box.Y <= -bullets[i].Box.Height || bullets[i].Box.X >= game.DefaultWidth + bullets[i].Box.Width)
+				{
+					game.RemoveDrawable(bullets[i].Box);
+					bullets.Remove(bullets[i]);
+				}
 			}
 
-			powerBar.Width = force / maxForce * powerBarBg.Width;
+			powerBar.Width = force / maxForce * (powerBarBg.Width-15) ;
 			powerBar.X = powerBarPos + powerBar.Width / 2;
 
 			CheckCollisions();
@@ -95,10 +100,16 @@ namespace Game
 			if (keys.Contains(Gdk.Key.Left))
 			{
 				elevation += 0.1;
+
+				if (elevation > 1.6)
+					elevation = 1.6;
 			}
 			if (keys.Contains(Gdk.Key.Right))
 			{
 				elevation -= 0.1;
+
+				if (elevation < 0)
+					elevation = -0;
 			}
 
 			if (force > maxForce)
@@ -146,8 +157,8 @@ namespace Game
 		public void FireCannon()
 		{
 			Vector2 barrelTip;
-			barrelTip.x = barrel.X + barrel.Width/2 * Math.Cos(barrel.Angle);
-			barrelTip.y = barrel.Y + barrel.Width/2 * Math.Sin(barrel.Angle);
+			barrelTip.x = barrel.X + barrel.Width / 2 * Math.Cos(barrel.Angle);
+			barrelTip.y = barrel.Y + barrel.Width / 2 * Math.Sin(barrel.Angle);
 			Bullet bullet = new Bullet(barrelTip, barrel.Angle, force);
 			game.AddDrawable(bullet.Box);
 			bullets.Add(bullet);
@@ -162,6 +173,7 @@ namespace Game
 					if (IsColliding(bullets[i].Box, gameObjects[j].Box))
 					{
 						Console.WriteLine("Butt");
+						//FIXME: Do physicstuff here maybe
 					}
 				}
 			}
@@ -169,17 +181,14 @@ namespace Game
 
 		public bool IsColliding(Rectangle r1, Rectangle r2)
 		{
-			bool result = false;
 			if (r1.X + r1.Width / 2 > r2.X - r2.Width && r1.X - r1.Width / 2 < r2.X + r2.Width)
 			{
 				if (r1.Y + r1.Height / 2 > r2.Y - r2.Height && r1.Y - r1.Height / 2 < r2.Y + r2.Height)
 				{
-					result = true;
+					return true;
 				}
 			}
-
-			return result;
-
+			return false;
 		}
 
 		class GameObject

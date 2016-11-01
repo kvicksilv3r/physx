@@ -22,7 +22,7 @@ namespace Game
 		public GameApp() : base("Game")
 		{
 			// Set up a suitably-sized window
-			SetDefaultSize(800, 600);
+			SetDefaultSize(1280, 720);
 			SetPosition(WindowPosition.Center);
 			DeleteEvent += delegate { Application.Quit(); };
 
