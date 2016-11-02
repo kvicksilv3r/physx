@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Cairo;
 
-//FIXME: Lägg in allt i gameObjects istället för att separera bullets och object
-// poäng
-// Fixa blå portalen
-// Spawna block
+//FIXME: 
+// Poäng?
+// Spawna block --
 // Köra tanken?
 
 // The Actor class is where Drawable objects are added to the game and their positions updated.
@@ -19,6 +19,7 @@ namespace Game
 		private DateTime time = DateTime.Now;
 		// Add your data structures below this comment
 		private double elevation = 1.57 / 2;
+		private double TimeToSpawn = 3;
 
 		private double force = 0.0;
 		private double powerBarLength = 8;
@@ -61,10 +62,11 @@ namespace Game
 
 			// Add your initialisations below this comment
 
-			bluePortal = new GameObject("portal");
+			bluePortal = new GameObject("portal2");
 			bluePortal.Box = new Rectangle(40, 450, 50, 200, colorBlue);
 			bluePortal.Active = false;
 			game.AddDrawable(bluePortal.Box);
+			gameObjects.Add(bluePortal);
 
 			orangePortal = new GameObject("portal");
 			orangePortal.Active = false;
@@ -95,7 +97,7 @@ namespace Game
 			HandleKeys();
 			barrel.Angle = elevation;
 
-			
+			SpawnBoxes();
 
 			for (int i = 0; i < gameObjects.Count; i++)
 			{
@@ -210,23 +212,57 @@ namespace Game
 							gameObjects[i].Velocity = gameObjects[i].Velocity * 0.33;
 							gameObjects[j].Active = true;
 						}
+						else if(gameObjects[i].Type == "bullet" && gameObjects[j].Type == "bullet")
+						{
+							gameObjects[j].Velocity = gameObjects[i].Velocity * 0.66;
+							gameObjects[i].Velocity = gameObjects[i].Velocity * 0.33;
+						}
 						else if (gameObjects[j].Type == "portal")
 						{
-							Portal(i);
+							Teleport(i, false);
+						}
+						else if (gameObjects[j].Type == "portal2")
+						{
+							Teleport(i, true);
 						}
 					}
 				}
 			}
 		}
 
-		public void Portal(int index)
+		public void Teleport(int index, bool blue)
 		{
 			double offset;
 
-			offset = gameObjects[index].Box.Y - orangePortal.Box.Y;
-			gameObjects[index].Box.X = bluePortal.Box.X;
+			if (blue)
+			{
+				offset = gameObjects[index].Box.X - bluePortal.Box.X;
+				gameObjects[index].Box.Y = orangePortal.Box.Y + orangePortal.Box.Height / 2 + gameObjects[index].Box.Height / 2 + 1;
+				gameObjects[index].Box.X = orangePortal.Box.X + offset;
+			}
 
+			else
+			{
+				offset = gameObjects[index].Box.Y - orangePortal.Box.Y;
 
+				if (offset > orangePortal.Box.Height / 2 - 50 || offset < -orangePortal.Box.Height / 2 + 10)
+				{
+					gameObjects[index].Box.Y = bluePortal.Box.Y - bluePortal.Box.Height / 2 - gameObjects[index].Box.Height / 2 - 1;
+					offset = gameObjects[index].Box.X - orangePortal.Box.X;
+					gameObjects[index].Box.X = bluePortal.Box.X + offset;
+
+				}
+				else
+				{
+					gameObjects[index].Box.X = bluePortal.Box.X + bluePortal.Box.Width / 2 + gameObjects[index].Box.Width / 2 + 1;
+					gameObjects[index].Box.Y = bluePortal.Box.Y + offset;
+				}
+			}
+		}
+
+		public void SpawnBoxes()
+		{
+			TimeToSpawn -= 
 		}
 
 		public bool IsColliding(Rectangle r1, Rectangle r2)
@@ -246,7 +282,6 @@ namespace Game
 			protected string type;
 			protected Vector2 velocity;
 			protected Rectangle box;
-			protected int weight;
 			protected bool active = false;
 
 			public GameObject(string type)

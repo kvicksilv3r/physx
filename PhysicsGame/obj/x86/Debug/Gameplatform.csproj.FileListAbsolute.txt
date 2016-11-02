@@ -43,3 +43,18 @@ D:\Projects\Skool\physx\PhysicsGame\bin\Debug\atk-sharp.pdb
 D:\Projects\Skool\physx\PhysicsGame\bin\Debug\gdk-sharp.pdb
 D:\Projects\Skool\physx\PhysicsGame\bin\Debug\pango-sharp.pdb
 D:\Projects\Skool\physx\PhysicsGame\obj\x86\Debug\Gameplatform.csprojResolveAssemblyReference.cache
+H:\Skool\Spelprogg A\physx\PhysicsGame\obj\x86\Debug\Puff.exe
+H:\Skool\Spelprogg A\physx\PhysicsGame\obj\x86\Debug\Puff.pdb
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\Puff.exe
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\Puff.pdb
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\atk-sharp.dll
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\gdk-sharp.dll
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\glib-sharp.dll
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\gtk-sharp.dll
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\Mono.Cairo.dll
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\pango-sharp.dll
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\glib-sharp.pdb
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\atk-sharp.pdb
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\gdk-sharp.pdb
+H:\Skool\Spelprogg A\physx\PhysicsGame\bin\Debug\pango-sharp.pdb
+H:\Skool\Spelprogg A\physx\PhysicsGame\obj\x86\Debug\Gameplatform.csprojResolveAssemblyReference.cache
