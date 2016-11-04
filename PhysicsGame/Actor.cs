@@ -121,7 +121,8 @@ namespace Game
 				}
 			}
 
-			//Powerbaren är en rektangel som ökar i bredd och ändrar position baserat på force
+			//Powerbaren är en rektangel som ökar i bredd och ändrar position baserat på force, detta för att ge illusionen av en växande bar och ej en expanderande rektangel
+			//Den ligger även ovanför en svart rektangel som representerar maxpower
 			powerBar.Width = force / maxForce * (powerBarBg.Width - 15);
 			powerBar.X = powerBarPos + powerBar.Width / 2;
 
@@ -283,7 +284,7 @@ namespace Game
 				TimeToSpawn = 3;
 
 				GameObject g = new GameObject("target");
-				g.Box = new Rectangle(random.Next(200, game.DefaultWidth - 200), random.Next(300, game.DefaultHeight - 200), targetSize, targetSize,
+				g.Box = new Rectangle(random.Next(200, game.DefaultWidth - 200), random.Next(200, game.DefaultHeight - 200), targetSize, targetSize,
 					new double[] { random.Next(256) / 255f, random.Next(256) / 255f, random.Next(256) / 255f });
 				game.AddDrawable(g.Box);
 				gameObjects.Add(g);
