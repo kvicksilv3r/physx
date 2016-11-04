@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using Cairo;
 
-//FIXME:
-// Köra tanken?
+// A simple physics program by
+// Axel Ohrås
+// Douglas Ekehammar Schelin
 
 // The Actor class is where Drawable objects are added to the game and their positions updated.
 namespace Game
@@ -15,14 +16,18 @@ namespace Game
 
 		// Keeping track of the time is useful timed updates
 		private DateTime time = DateTime.Now;
-		// Add your data structures below this comment
-		private double elevation = 1.57 / 2;
-		private double TimeToSpawn = 3;
 
+		// Add your data structures below this comment
+
+		private double cannonAngle = 1.57 / 2;
 		private double force = 0.0;
-		private double powerBarLength = 8;
 		private double maxForce = 60;
 		private double forceIncrease = 1;
+
+		private double TimeToSpawn = 3;
+
+		private double powerBarLength = 8;
+		private double powerBarPos = 40;
 
 		private double gravity = -1;
 
@@ -36,19 +41,16 @@ namespace Game
 		private GameObject orangePortal;
 		private GameObject bluePortal;
 
-		private GameObject target1;
-
-		private double powerBarPos = 40;
 
 		Rectangle barrel;
 		Circle body;
-		Vector2 tank_Position = new Vector2()
+		Vector2 cannonPosition = new Vector2()
 		{
 			x = 15,
 			y = 15
 		};
 
-		List<GameObject> gameObjects = new List<GameObject>();
+		private List<GameObject> gameObjects = new List<GameObject>();
 
 		double[] colorRed = new double[] { 1, 0, 0 };
 		double[] colorBlue = new double[] { 31 / 255.0, 175 / 255.0, 242 / 255.0 };
@@ -82,17 +84,12 @@ namespace Game
 			powerBar = new Rectangle(powerBarPos, game.DefaultHeight - 40, 0, 20, colorRed);
 			powerBarBg = new Rectangle(-4 + powerBarPos + (maxForce * powerBarLength) / 2, game.DefaultHeight - 40, maxForce * powerBarLength, 26);
 
-			target1 = new GameObject("target");
-			target1.Box = new Rectangle(400, 400, targetSize, targetSize);
-			gameObjects.Add(target1);
-
-			body = new Circle(tank_Position.x, tank_Position.y, 25);
+			body = new Circle(cannonPosition.x, cannonPosition.y, 25);
 			barrel = new Rectangle(body.X, body.Y, 150, 10);
 			game.AddDrawable(body);
 			game.AddDrawable(barrel);
 			game.AddDrawable(powerBarBg);
 			game.AddDrawable(powerBar);
-			game.AddDrawable(target1.Box);
 		}
 
 		// The Do() method is called every 20 ms, do any animation here.
@@ -100,11 +97,13 @@ namespace Game
 		public void Do()
 		{
 			HandleKeys();
-			barrel.Angle = elevation;
+			barrel.Angle = cannonAngle; //Sätter kanonens rotation
 
-			SpawnBoxes();
+			SpawnTargets();
 
-			for (int i = 0; i < gameObjects.Count; i++)
+			//Loppar igenom alla spelobjekt och flyttar dem ifall de är aktiverade.
+			//Tar även bort objekt som hamnar nedanför eller till höger om spelområdet
+			for (int i = 0; i < gameObjects.Count; i++) 
 			{
 				if (gameObjects[i].Active)
 				{
@@ -122,28 +121,31 @@ namespace Game
 				}
 			}
 
+			//Powerbaren är en rektangel som ökar i bredd och ändrar position baserat på force
 			powerBar.Width = force / maxForce * (powerBarBg.Width - 15);
 			powerBar.X = powerBarPos + powerBar.Width / 2;
 
+			//Kollar till sist kollisioner 
 			CheckCollisions();
 		}
 
+		//Metod som hanterar input. Denna skrevs då originalkoden ej tillät mer än en knapptryckning åt gången. 
 		public void HandleKeys()
 		{
-
+			//kontrollerar kanonens vinkel. Går ej att vrida denna mer än 90 grader
 			if (keys.Contains(Gdk.Key.Left))
 			{
-				elevation += 0.05;
+				cannonAngle += 0.05;
 
-				if (elevation > 1.57)
-					elevation = 1.57;
+				if (cannonAngle > 1.57)
+					cannonAngle = 1.57;
 			}
 			if (keys.Contains(Gdk.Key.Right))
 			{
-				elevation -= 0.05;
+				cannonAngle -= 0.05;
 
-				if (elevation < 0)
-					elevation = -0;
+				if (cannonAngle < 0)
+					cannonAngle = -0;
 			}
 
 			if (keys.Contains(Gdk.Key.Escape))
@@ -176,7 +178,7 @@ namespace Game
 
 			lastKeys = keys;
 		}
-		// The HandleKey() method is called if the user presses any keyboard key 
+		// Känner när en knapp trycks ned
 		public void OnKeyPress(Gdk.Key key)
 		{
 			if (!keys.Contains(key))
@@ -185,6 +187,7 @@ namespace Game
 			}
 		}
 
+		//Känner av när en knapp släpps
 		public void OnKeyRelease(Gdk.Key key)
 		{
 			if (keys.Contains(key))
@@ -193,6 +196,7 @@ namespace Game
 			}
 		}
 
+		//Avfyrar ett skott i samma riktning som kanonen är riktad åt och med utsatt kraft
 		public void FireCannon()
 		{
 			Vector2 barrelTip;
@@ -203,6 +207,8 @@ namespace Game
 			gameObjects.Add(bullet);
 		}
 
+		//Metod som loopar igenom alla objekt och ser ifall de kolliderar med något (med hjälp av en annan metod)
+		//och gör saker baserat på vad objekten kolliderar med. Detta görs med hjälp av taggar på alla objekt 
 		public void CheckCollisions()
 		{
 			for (int i = 0; i < gameObjects.Count; i++)
@@ -217,7 +223,7 @@ namespace Game
 							gameObjects[i].Velocity = gameObjects[i].Velocity * 0.33;
 							gameObjects[j].Active = true;
 						}
-						else if(gameObjects[i].Type == "bullet" && gameObjects[j].Type == "bullet")
+						else if (gameObjects[i].Type == "bullet" && gameObjects[j].Type == "bullet")
 						{
 							gameObjects[j].Velocity = gameObjects[i].Velocity * 0.66;
 							gameObjects[i].Velocity = gameObjects[i].Velocity * 0.33;
@@ -235,6 +241,8 @@ namespace Game
 			}
 		}
 
+		//Metod som hanterar teleportationen från portalerna. Träffas den blå kommer kulan ut ur toppen av orangea, detta för att ge en kul effekt när 
+		//kanonen avfyras rakt upp. Kan skrivas mycket finare men hade inget behov att göra detta då lösningen faktiskt fungerar
 		public void Teleport(int index, bool blue)
 		{
 			double offset;
@@ -250,7 +258,7 @@ namespace Game
 			{
 				offset = gameObjects[index].Box.Y - orangePortal.Box.Y;
 
-				if (offset > orangePortal.Box.Height / 2 - 50 || offset < -orangePortal.Box.Height / 2 + 10)
+				if (offset > orangePortal.Box.Height / 2 - 20 || offset < -orangePortal.Box.Height / 2 + 10)
 				{
 					gameObjects[index].Box.Y = bluePortal.Box.Y - bluePortal.Box.Height / 2 - gameObjects[index].Box.Height / 2 - 1;
 					offset = gameObjects[index].Box.X - orangePortal.Box.X;
@@ -265,21 +273,24 @@ namespace Game
 			}
 		}
 
-		public void SpawnBoxes()
+		//Slänger ur sig targets (boxes) med en random färg. Detta händer en gång var 1.5 sekund. 
+		//Boxen hamnar någonstans på spelplanen så länge det är minst 200 pixlar till kanten
+		public void SpawnTargets()
 		{
-			TimeToSpawn -= 1/20f;
-			if(TimeToSpawn <= 0)
+			TimeToSpawn -= 1 / 25f;
+			if (TimeToSpawn <= 0)
 			{
 				TimeToSpawn = 3;
 
 				GameObject g = new GameObject("target");
 				g.Box = new Rectangle(random.Next(200, game.DefaultWidth - 200), random.Next(300, game.DefaultHeight - 200), targetSize, targetSize,
-					new double[] { random.Next(256)/255f, random.Next(256) / 255f, random.Next(256) / 255f });
+					new double[] { random.Next(256) / 255f, random.Next(256) / 255f, random.Next(256) / 255f });
 				game.AddDrawable(g.Box);
 				gameObjects.Add(g);
 			}
 		}
 
+		//Simpel box-collision. Testar ifall två rektanglar överlappar varandra.
 		public bool IsColliding(Rectangle r1, Rectangle r2)
 		{
 			if (r1.X + r1.Width / 2 > r2.X - r2.Width / 2 && r1.X - r1.Width / 2 < r2.X + r2.Width / 2)
@@ -292,6 +303,8 @@ namespace Game
 			return false;
 		}
 
+		//Klass som håller koll på velocity, typ, rektangel samt ifall objektet är aktivt. 
+		//Aktiv-boolen är till för att kunna frysa portalers position samt targets innan de blivit träffade
 		class GameObject
 		{
 			protected string type;
@@ -330,6 +343,7 @@ namespace Game
 
 		}
 
+		//Kulor har en egen klass, detta för att hjälpa till organisera arbetet när programmet skrevs. Skulle kunna skippas men lämnats kvar för tillfället.
 		class Bullet : GameObject
 		{
 			public Bullet(Vector2 position, double direction, double force, string type) : base(type)
@@ -341,6 +355,7 @@ namespace Game
 			}
 		}
 
+		//Egen struct för att göra det så likt Unity som möjligt. Gör movement lättare att arbeta med
 		struct Vector2
 		{
 			public double x;
