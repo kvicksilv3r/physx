@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using Cairo;
 
-//FIXME: 
-// Poäng?
-// Spawna block --
+//FIXME:
 // Köra tanken?
 
 // The Actor class is where Drawable objects are added to the game and their positions updated.
@@ -30,6 +28,10 @@ namespace Game
 
 		private Rectangle powerBar;
 		private Rectangle powerBarBg;
+
+		private int targetSize = 50;
+
+		private Random random = new Random();
 
 		private GameObject orangePortal;
 		private GameObject bluePortal;
@@ -62,6 +64,9 @@ namespace Game
 
 			// Add your initialisations below this comment
 
+			Console.WriteLine("Aim the cannon with left and right arrow keys");
+			Console.WriteLine("Hold down space to adjust power. Release to shoot");
+
 			bluePortal = new GameObject("portal2");
 			bluePortal.Box = new Rectangle(40, 450, 50, 200, colorBlue);
 			bluePortal.Active = false;
@@ -78,7 +83,7 @@ namespace Game
 			powerBarBg = new Rectangle(-4 + powerBarPos + (maxForce * powerBarLength) / 2, game.DefaultHeight - 40, maxForce * powerBarLength, 26);
 
 			target1 = new GameObject("target");
-			target1.Box = new Rectangle(400, 400, 50, 50);
+			target1.Box = new Rectangle(400, 400, targetSize, targetSize);
 			gameObjects.Add(target1);
 
 			body = new Circle(tank_Position.x, tank_Position.y, 25);
@@ -262,7 +267,17 @@ namespace Game
 
 		public void SpawnBoxes()
 		{
-			TimeToSpawn -= 
+			TimeToSpawn -= 1/20f;
+			if(TimeToSpawn <= 0)
+			{
+				TimeToSpawn = 3;
+
+				GameObject g = new GameObject("target");
+				g.Box = new Rectangle(random.Next(200, game.DefaultWidth - 200), random.Next(300, game.DefaultHeight - 200), targetSize, targetSize,
+					new double[] { random.Next(256)/255f, random.Next(256) / 255f, random.Next(256) / 255f });
+				game.AddDrawable(g.Box);
+				gameObjects.Add(g);
+			}
 		}
 
 		public bool IsColliding(Rectangle r1, Rectangle r2)
